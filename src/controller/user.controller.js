@@ -174,8 +174,8 @@ const verifyOTP = async (req, res) => {
   res.status(httpStatus.OK).json({ message: "OTP verified successfully" });
 };
 
-// forget password first send the otp
-const sendForgetPassOTP = async (req, res) => {
+// forgot password first send the otp
+const sendForgotPassOTP = async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
@@ -186,15 +186,15 @@ const sendForgetPassOTP = async (req, res) => {
 
   const normalizedEmail = email.toLowerCase();
 
-  const forgetOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  const forgotOtp = Math.floor(100000 + Math.random() * 900000).toString();
 
-  const hashedForgetOtp = await bcrypt.hash(forgetOtp, 10);
+  const hashedForgotOtp = await bcrypt.hash(forgotOtp, 10);
 
   const user = await User.findOne({ email: normalizedEmail });
 
   if (user) {
     user.otp = {
-      code: hashedForgetOtp,
+      code: hashedForgotOtp,
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
       isVerified: false,
       purpose: "reset",
@@ -207,7 +207,7 @@ const sendForgetPassOTP = async (req, res) => {
       .json({ message: "If the email is valid, you will receive an OTP." });
   }
 
-  await sendEmail(normalizedEmail, forgetOtp);
+  await sendEmail(normalizedEmail, forgotOtp);
 
   res.status(httpStatus.OK).json({
     message:
@@ -215,8 +215,8 @@ const sendForgetPassOTP = async (req, res) => {
   });
 };
 
-// vefify forget password otp
-const verifyForgetPassOTP = async (req, res) => {
+// vefify forgot password otp
+const verifyForgotPassOTP = async (req, res) => {
   const { email, otp } = req.body;
 
   const user = await User.findOne({ email: email.toLowerCase() });
@@ -228,15 +228,12 @@ const verifyForgetPassOTP = async (req, res) => {
   }
 
   if (user.otp.purpose !== "reset") {
-    return res.status(400).json({ message: "Invalid OTP for Forget password" });
+    return res.status(400).json({ message: "Invalid OTP for Forgot password" });
   }
 
   if (user.otp.expiresAt < new Date()) {
     return res.status(httpStatus.BAD_REQUEST).json({ message: "OTP expired" });
   }
-
-  console.log(otp);
-  console.log(user.otp.code);
 
   const isMatch = await bcrypt.compare(otp, user.otp.code);
 
@@ -287,7 +284,7 @@ export {
   login,
   sendOTP,
   verifyOTP,
-  sendForgetPassOTP,
-  verifyForgetPassOTP,
+  sendForgotPassOTP,
+  verifyForgotPassOTP,
   resetPassword,
 };

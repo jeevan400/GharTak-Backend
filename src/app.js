@@ -7,9 +7,15 @@ import { User } from './model/user.js';
 import { Product } from './model/product.js';
 
 import userRoutes from "./routes/user.routes.js"
+import cors from "cors";
 
 const app = express();
 const port = 9000;
+
+app.use(cors({
+    origin:"http://localhost:5173",
+    credentials:true
+}));
 
 app.set("port", (process.env.PORT) || 9000);
 app.use(express.json());
