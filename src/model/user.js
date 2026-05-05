@@ -17,7 +17,7 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: false,
     },
     role: {
       type: String,
@@ -61,6 +61,10 @@ const userSchema = new Schema(
       isVerified: {
         type: Boolean,
         default: false,
+      },
+      purpose: {
+        type: String,
+        enum: ["register", "reset"],
       },
     },
   },
