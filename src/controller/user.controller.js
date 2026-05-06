@@ -3,6 +3,7 @@ import httpStatus from "http-status";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/sendEmail.js";
+import {OAuth2Client} from "google-auth-library";
 
 // login controller
 const login = async (req, res) => {
@@ -279,6 +280,46 @@ const resetPassword = async (req, res) => {
   res.status(httpStatus.OK).json({ message: "Password reset successfully" });
 };
 
+//signIn with google
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const googleLogin = async (req, res) =>{
+  const {token} = req.body;
+
+  try{
+    const ticket = await client.verifyIdToken({
+      idToken:token,
+      audience:process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    const {email, name} = payload;
+
+    let user = await User.findOne({email});
+
+    if(!user){
+      user = await User.create({
+        email,
+        name,
+        isSocialLogin:true,
+      });
+    }
+
+    const appToken = jwt.sign({
+      id: user._id,
+      email: user.email,
+    },
+    process.env.JWT_SECRET,
+    {expiresIn: "1d"}
+  );
+
+  res.json({token: appToken});
+
+  } catch(e){
+    res.status(401).json({message: e.message});
+  }
+};
+
 export {
   register,
   login,
@@ -287,4 +328,5 @@ export {
   sendForgotPassOTP,
   verifyForgotPassOTP,
   resetPassword,
+  googleLogin
 };
