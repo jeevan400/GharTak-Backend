@@ -320,6 +320,28 @@ const googleLogin = async (req, res) =>{
   }
 };
 
+// get user data 
+const getProfile = async (req, res)=>{
+  try{
+    const user = await User.findById(req.user.id).select("-password");
+
+    res.status(httpStatus.OK).json(user);
+  } catch(e){
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
+  }
+}
+
+// user update 
+const updateProfile = async(req, res)=>{
+  try{
+    const updatedUser = await User.findByIdAndUpdate(req.user.id, req.body, {new:true}).select("-password");
+
+    res.status(200).json(updatedUser);
+  } catch(e){
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
+  }
+}
+
 export {
   register,
   login,
@@ -328,5 +350,7 @@ export {
   sendForgotPassOTP,
   verifyForgotPassOTP,
   resetPassword,
-  googleLogin
+  googleLogin,
+  getProfile,
+  updateProfile
 };
