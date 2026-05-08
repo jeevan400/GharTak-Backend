@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { register, login, sendOTP, verifyOTP, sendForgotPassOTP, verifyForgotPassOTP, resetPassword, googleLogin, getProfile, updateProfile } from "../controller/user.controller.js";
+import { register, login, sendOTP, verifyOTP, sendForgotPassOTP, verifyForgotPassOTP, resetPassword, googleLogin, getProfile, updateProfile, requestSellerRole, getSellerRequest, approveSellerRequest, rejectSellerRequest } from "../controller/user.controller.js";
 import verifyToken from "../middlewares/auth.middleware.js";
+import isAdmin from "../middlewares/admin.middleware.js";
 
 const router = Router();
 
@@ -14,6 +15,10 @@ router.route("/reset-password").post(resetPassword);
 router.route("/google-login").post(googleLogin);
 router.route("/profile").get(verifyToken, getProfile);
 router.route("/profile").patch(verifyToken, updateProfile);
+router.route("/request-seller").patch(verifyToken, requestSellerRole);
+router.route("/seller-requests").get(verifyToken, isAdmin, getSellerRequest);
+router.route("/approve-request/:id").patch(verifyToken, isAdmin, approveSellerRequest);
+router.route("/reject-request/:id").patch(verifyToken, isAdmin, rejectSellerRequest);
 
 
 export default router;

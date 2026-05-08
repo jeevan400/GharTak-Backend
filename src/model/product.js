@@ -35,6 +35,11 @@ const productSchema = new Schema({
         type:String,
         required:true
     }],
+    seller:{
+        type:Schema.Types.ObjectId,
+        ref:"User",
+        required:true
+    },
     isActive:{
         type:Boolean,
         default:true

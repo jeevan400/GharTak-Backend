@@ -3,7 +3,7 @@ import httpStatus from "http-status";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/sendEmail.js";
-import {OAuth2Client} from "google-auth-library";
+import { OAuth2Client } from "google-auth-library";
 
 // login controller
 const login = async (req, res) => {
@@ -282,61 +282,136 @@ const resetPassword = async (req, res) => {
 
 //signIn with google
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const googleLogin = async (req, res) =>{
-  const {token} = req.body;
+const googleLogin = async (req, res) => {
+  const { token } = req.body;
 
-  try{
+  try {
     const ticket = await client.verifyIdToken({
-      idToken:token,
-      audience:process.env.GOOGLE_CLIENT_ID,
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
 
     const payload = ticket.getPayload();
 
-    const {email, name} = payload;
+    const { email, name } = payload;
 
-    let user = await User.findOne({email});
+    let user = await User.findOne({ email });
 
-    if(!user){
+    if (!user) {
       user = await User.create({
         email,
         name,
-        isSocialLogin:true,
+        isSocialLogin: true,
       });
     }
 
-    const appToken = jwt.sign({
-      id: user._id,
-      email: user.email,
-    },
-    process.env.JWT_SECRET,
-    {expiresIn: "1d"}
-  );
+    const appToken = jwt.sign(
+      {
+        id: user._id,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" },
+    );
 
-  res.json({token: appToken});
-
-  } catch(e){
-    res.status(401).json({message: e.message});
+    res.json({ token: appToken });
+  } catch (e) {
+    res.status(401).json({ message: e.message });
   }
 };
 
-// get user data 
-const getProfile = async (req, res)=>{
-  try{
+// get user data
+const getProfile = async (req, res) => {
+  try {
     const user = await User.findById(req.user.id).select("-password");
 
     res.status(httpStatus.OK).json(user);
+  } catch (e) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
+  }
+};
+
+// user update
+const updateProfile = async (req, res) => {
+  try {
+    // console.log(req);
+    const updatedUser = await User.findByIdAndUpdate(req.user.id, req.body, {
+      new: true,
+    }).select("-password");
+
+    res.status(200).json(updatedUser);
+  } catch (e) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
+  }
+};
+
+// create seller requrest api
+const requestSellerRole = async (req, res) => {
+  try {
+    // console.log(req);
+    const user = await User.findById(req.user.id);
+
+    if (user.role === "seller") {
+      return res.status(400).json({ message: "Already a seller" });
+    }
+
+    user.sellerRequestStatus = "pending";
+    await user.save();
+
+    res
+      .status(httpStatus.OK)
+      .json({ message: "Seller request sent Successfully." });
+  } catch (e) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
+  }
+};
+
+// get seller request
+const getSellerRequest = async (req, res) => {
+  try {
+    const users = await User.find({ sellerRequestStatus: "pending" }).select(
+      "-password",
+    );
+    res.status(httpStatus.OK).json(users);
+  } catch (e) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
+  }
+};
+
+// approve seller request
+const approveSellerRequest = async (req, res)=>{
+  try{
+    const user = await User.findById(req.params.id);
+
+    if(!user){
+      return res.status(httpStatus.NOT_FOUND).json({message:"User not found!"});
+    }
+
+    user.role = "seller";
+    user.sellerRequestStatus = "approved";
+
+    await user.save();
+
+    res.status(httpStatus.OK).json({message:"Seller request approved"});
   } catch(e){
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
   }
 }
 
-// user update 
-const updateProfile = async(req, res)=>{
+//seller request rejected
+const rejectSellerRequest = async (req, res)=>{
   try{
-    const updatedUser = await User.findByIdAndUpdate(req.user.id, req.body, {new:true}).select("-password");
+    const user = await User.findById(req.params.id);
 
-    res.status(200).json(updatedUser);
+    if(!user){
+      return res.status(httpStatus.NOT_FOUND).json({message:"User not found!"});
+    }
+
+    user.sellerRequestStatus = "rejected";
+    
+    await user.save();
+
+    res.status(httpStatus.OK).json({message:"Seller request rejected!"});
   } catch(e){
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
   }
@@ -352,5 +427,9 @@ export {
   resetPassword,
   googleLogin,
   getProfile,
-  updateProfile
+  updateProfile,
+  requestSellerRole,
+  getSellerRequest,
+  approveSellerRequest,
+  rejectSellerRequest
 };
