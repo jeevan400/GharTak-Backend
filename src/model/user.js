@@ -36,6 +36,11 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    sellerRequestStatus:{
+      type:String,
+      enum:["none", "pending", "approved", "rejected"],
+      default:"none"
+    },
     phone: {
       type: String,
       required: false,
