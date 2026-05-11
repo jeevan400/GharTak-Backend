@@ -6,7 +6,8 @@ import mongoose from 'mongoose';
 import { User } from './model/user.js';
 import { Product } from './model/product.js';
 
-import userRoutes from "./routes/user.routes.js"
+import userRoutes from "./routes/user.routes.js";
+import productRoutes from "./routes/product.routes.js";
 import cors from "cors";
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/products/", productRoutes);
 
 
 const start = async ()=>{

@@ -3,8 +3,8 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: "../../.env" });
 
-console.log(process.env.EMAIL_USER);
-console.log(process.env.EMAIL_PASSWORD);
+// console.log(process.env.EMAIL_USER);
+// console.log(process.env.EMAIL_PASSWORD);
 const sendEmail = async (to, otp) => {
   try {
     const transporter = nodemailer.createTransport({
@@ -22,7 +22,7 @@ const sendEmail = async (to, otp) => {
       text: `Your OTP is ${otp}`,
     });
 
-    console.log("Email send : ", info.response);
+    // console.log("Email send : ", info.response);
   } catch (e) {
     console.log("Error sending email: ", e);
   }
