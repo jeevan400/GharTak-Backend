@@ -34,7 +34,7 @@ const login = async (req, res) => {
           id: user._id,
           email: user.email,
           role: user.role,
-          image:user.image,
+          image: user.image,
         },
         process.env.JWT_SECRET,
         {
@@ -44,7 +44,7 @@ const login = async (req, res) => {
 
       //   user.token = token;
       //   await user.save();
-      return res.status(httpStatus.OK).json({ token: token });
+      return res.status(httpStatus.OK).json({message:"User Login Successfully!"},{ token: token });
     } else {
       return res
         .status(httpStatus.UNAUTHORIZED)
@@ -340,7 +340,9 @@ const updateProfile = async (req, res) => {
       new: true,
     }).select("-password");
 
-    res.status(200).json(updatedUser);
+    res
+      .status(200)
+      .json({ message: "Profile Updated Successfully!" }, updatedUser);
   } catch (e) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
   }
@@ -380,12 +382,14 @@ const getSellerRequest = async (req, res) => {
 };
 
 // approve seller request
-const approveSellerRequest = async (req, res)=>{
-  try{
+const approveSellerRequest = async (req, res) => {
+  try {
     const user = await User.findById(req.params.id);
 
-    if(!user){
-      return res.status(httpStatus.NOT_FOUND).json({message:"User not found!"});
+    if (!user) {
+      return res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: "User not found!" });
     }
 
     user.role = "seller";
@@ -393,30 +397,32 @@ const approveSellerRequest = async (req, res)=>{
 
     await user.save();
 
-    res.status(httpStatus.OK).json({message:"Seller request approved"});
-  } catch(e){
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
+    res.status(httpStatus.OK).json({ message: "Seller request approved" });
+  } catch (e) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
   }
-}
+};
 
 //seller request rejected
-const rejectSellerRequest = async (req, res)=>{
-  try{
+const rejectSellerRequest = async (req, res) => {
+  try {
     const user = await User.findById(req.params.id);
 
-    if(!user){
-      return res.status(httpStatus.NOT_FOUND).json({message:"User not found!"});
+    if (!user) {
+      return res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: "User not found!" });
     }
 
     user.sellerRequestStatus = "rejected";
-    
+
     await user.save();
 
-    res.status(httpStatus.OK).json({message:"Seller request rejected!"});
-  } catch(e){
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
+    res.status(httpStatus.OK).json({ message: "Seller request rejected!" });
+  } catch (e) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
   }
-}
+};
 
 export {
   register,
@@ -432,5 +438,5 @@ export {
   requestSellerRole,
   getSellerRequest,
   approveSellerRequest,
-  rejectSellerRequest
+  rejectSellerRequest,
 };
