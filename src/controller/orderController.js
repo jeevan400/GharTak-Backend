@@ -75,4 +75,36 @@ const getMyOrder = async (req, res) => {
     }
 }
 
-export { orderCreate, getMyOrder };
+//update order status
+const updateOrderStatus = async (req, res) => {
+  try{
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    const order = await Order.findById(orderId).populate("items.product");
+
+    if(!order){
+      return res.status(httpStatus.NOT_FOUND).json({message:"Order not found"});
+    }
+
+    //check seller authorization
+    const sellerOwnsProducts = order.items?.some(
+      (item) => item?.product?.seller?.toString() === req.user.id
+    );
+
+    if(!sellerOwnsProducts) {
+      return res.status(httpStatus.UNAUTHORIZED).json({message:"Unauthorized Access"});
+    }
+
+    order.orderStatus = status;
+    
+    await order.save();
+
+    res.status(httpStatus.OK).json({message:"Status Updated Successfully!"});
+    
+  } catch(e){
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
+  }
+}
+
+export { orderCreate, getMyOrder, updateOrderStatus };
