@@ -42,9 +42,10 @@ const login = async (req, res) => {
         },
       );
 
-      //   user.token = token;
-      //   await user.save();
-      return res.status(httpStatus.OK).json({message:"User Login Successfully!"},{ token: token });
+      return res.status(httpStatus.OK).json({
+        message: "User Login Successfully!",
+        token,
+      });
     } else {
       return res
         .status(httpStatus.UNAUTHORIZED)

@@ -10,6 +10,7 @@ import userRoutes from "./routes/user.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import orderRoutes from "./routes/order.routes.js";
+import addressRoutes from "./routes/address.routes.js";
 
 import cors from "cors";
 
@@ -29,6 +30,7 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/products/", productRoutes);
 app.use("/api/v1/carts", cartRoutes);
 app.use("/api/v1/orders", orderRoutes);
+app.use("/api/v1/address", addressRoutes);
 
 
 const start = async ()=>{
@@ -41,64 +43,3 @@ const start = async ()=>{
 }
 
 start();
-
-// app.get('/', (req, res)=>{
-//     res.send("this is a sample route");
-// });
-
-// dummy user 
-// const user1 = {
-//     name: "Rahul Sharma",
-//     email: "rahul.sharma@gmail.com",
-//     password: "password123",
-//     role: "user",
-//     phone: "9876543210",
-//     address: {
-//       street: "123 Model Town",
-//       city: "Ludhiana",
-//       state: "Punjab",
-//       pincode: "141001"
-//     }
-//   };
-
-  // dummy product database
-//   const product1 = {
-//     name: "iPhone 13",
-//     description: "Apple iPhone 13 with A15 Bionic chip, 128GB storage",
-//     price: 65000,
-//     category: "electronics",
-//     brand: "Apple",
-//     stock: 10,
-//     image: [
-//       "https://example.com/images/iphone13-1.jpg",
-//       "https://example.com/images/iphone13-2.jpg"
-//     ],
-//     isActive: true
-//   }
-
-//   const saveUser = async ()=>{
-//     try{
-//         const newUser = new User(user1);
-//     await newUser.save();
-//     console.log("User Save successfully!");
-//     } catch(err){
-//         console.log("something went wrong", err);
-//     }
-//   }
-
-//   const saveProduct = async () =>{
-//     try{
-//         const newProduct = new Product(product1);
-//         await newProduct.save();
-//         console.log("product data save successfully in the database");
-//     } catch(err){
-//         console.log("something went wrong ");
-//     }
-//   }
-
-// saveProduct();
-//   saveUser();
-
-// app.listen(port, ()=>{
-//     console.log(`the server listen on port no ${port}`);
-// })
