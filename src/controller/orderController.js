@@ -5,7 +5,7 @@ import { Product } from "../model/product.js";
 
 const orderCreate = async (req, res) => {
   try {
-    const { fullname, phone, address, city, state, pincode, country } =
+    const { fullname, phone, address, city, state, pincode, country, deliveryMethod, isPaymentMethod} =
       req.body;
 
       // find cart
@@ -30,7 +30,9 @@ const orderCreate = async (req, res) => {
             pincode,
             country
         },
-        totalPrice:cart.totalPrice
+        totalPrice:cart.totalPrice,
+        deliveryMethod:deliveryMethod,
+        paymentMethod:isPaymentMethod
       });
 
       // update stock
