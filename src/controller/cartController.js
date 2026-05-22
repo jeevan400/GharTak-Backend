@@ -14,6 +14,9 @@ const addToCart = async (req, res)=>{
             return res.status(httpStatus.NOT_FOUND).json({message:"Product not found!"});
         }
 
+        if(product.stock === 0 ){
+            return res.status(400).json({message:"Product out of stock."});
+        }
         // stock check
         if(product.stock < quantity){
             return res.status(400).json({message:"Insufficient stock"});
@@ -38,7 +41,7 @@ const addToCart = async (req, res)=>{
 
             // if product already exists
             if(itemIndex > -1){
-                cart.items[itemIndex].quantity +=quantity;
+                cart.items[itemIndex].quantity += quantity;
             } else {
                 // add new product
                 cart.items.push({

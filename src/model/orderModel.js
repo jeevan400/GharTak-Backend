@@ -51,6 +51,10 @@ const orderSchema = new mongoose.Schema({
         type:Number,
         required:true
     },
+    deliveryMethod:{
+        type:String,
+        default:"Standard Delivery"
+    },
     paymentMethod:{
         type:String,
         default:"COD"
