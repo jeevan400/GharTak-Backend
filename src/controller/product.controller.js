@@ -122,6 +122,128 @@ const getSingleProduct = async (req, res) => {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
   }
 };
+
+// create reviews
+const addReviewForProfuct = async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+
+    const product = await Product.findById(req.params.productId);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found!" });
+    }
+
+    const alreadyReviewed = product.reviews.find(
+      (review) => review.user.toString() === req.user.id.toString(),
+    );
+
+    if (alreadyReviewed) {
+      return res
+        .status(400)
+        .json({ message: "You already reviewed this product." });
+    }
+
+    const review = {
+      user: req.user.id,
+      rating,
+      comment,
+    };
+
+    product.reviews.push(review);
+
+    await product.save();
+
+    res.status(httpStatus.OK).json({ message: "Review added successfully!" });
+  } catch (e) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
+  }
+};
+
+// get all reviews
+const getAllReviews = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.productId).populate(
+      "reviews.user",
+      "-password",
+    );
+
+    if (!product) {
+      return res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: "Product not found." });
+    }
+
+    const reviews = product.reviews;
+
+    res.status(httpStatus.OK).json(reviews);
+  } catch (e) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
+  }
+};
+
+// delete review
+const deleteReview = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.productId);
+
+    if (!product) {
+      return res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: "Product not found." });
+    }
+
+    const review = product.reviews.find(
+      (review) => review._id.toString() === req.params.reviewId.toString(),
+    );
+
+    if (!review) {
+      return res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: "Review not found." });
+    }
+
+    if (review.user.toString() !== req.user.id.toString()) {
+      return res
+        .status(httpStatus.UNAUTHORIZED)
+        .json({ message: "You are not authorized User." });
+    }
+
+    product.reviews = product.reviews?.filter(
+      (review) => review._id.toString() !== req.params.reviewId,
+    );
+
+    await product.save();
+
+    res.status(httpStatus.OK).json({ message: "Review Deleted" });
+  } catch (e) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
+  }
+};
+
+const updateReview = async (req, res) =>{
+  try{
+    const product = await Product.findById(req.params.productId);
+
+    if(!product) {
+       return res.status(httpStatus.NOT_FOUND).json({message:"Product not found."});
+    }
+
+    const review = product.reviews.find((review)=> review._id.toString() === req.params.reviewId.toString());
+
+    if(!review) {
+      return res.status(httpStatus.NOT_FOUND).json({message:"Review not found."});
+    }
+
+    if(review.user.toString() !== req.user.id.toString()){
+      return res.status(httpStatus.UNAUTHORIZED).json({message:"You are not a authorized User."});
+    }
+
+  } catch(e){
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
+  }
+}
+
 export {
   addProduct,
   getMyProduct,
@@ -129,4 +251,7 @@ export {
   deleteProduct,
   getAllProducts,
   getSingleProduct,
+  addReviewForProfuct,
+  getAllReviews,
+  deleteReview,
 };
