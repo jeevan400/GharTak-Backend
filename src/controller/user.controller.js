@@ -382,6 +382,16 @@ const getSellerRequest = async (req, res) => {
   }
 };
 
+//get all user whose request is reject and approve and pending
+const getAllStatusUser = async (req, res) => {
+  try{
+    const users = await User.find().select("-password");
+    res.status(httpStatus.OK).json(users);
+  } catch(e){
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
+  }
+}
+
 // approve seller request
 const approveSellerRequest = async (req, res) => {
   try {
@@ -438,6 +448,7 @@ export {
   updateProfile,
   requestSellerRole,
   getSellerRequest,
+  getAllStatusUser,
   approveSellerRequest,
   rejectSellerRequest,
 };
