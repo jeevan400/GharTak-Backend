@@ -223,6 +223,9 @@ const deleteReview = async (req, res) => {
 
 const updateReview = async (req, res) =>{
   try{
+
+    const {rating, comment } = req.body;
+
     const product = await Product.findById(req.params.productId);
 
     if(!product) {
@@ -239,6 +242,13 @@ const updateReview = async (req, res) =>{
       return res.status(httpStatus.UNAUTHORIZED).json({message:"You are not a authorized User."});
     }
 
+    review.rating = rating;
+    review.comment = comment;
+
+    await product.save();
+
+    res.status(httpStatus.OK).json({message:"Review updated successfully"});
+
   } catch(e){
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
   }
@@ -254,4 +264,5 @@ export {
   addReviewForProfuct,
   getAllReviews,
   deleteReview,
+  updateReview,
 };

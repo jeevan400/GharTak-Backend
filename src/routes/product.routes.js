@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addProduct, addReviewForProfuct, deleteProduct, deleteReview, getAllProducts, getAllReviews, getMyProduct, getSingleProduct, updateProduct } from "../controller/product.controller.js";
+import { addProduct, addReviewForProfuct, deleteProduct, deleteReview, getAllProducts, getAllReviews, getMyProduct, getSingleProduct, updateProduct, updateReview } from "../controller/product.controller.js";
 import verifyToken from "../middlewares/auth.middleware.js";
 import isSeller from "../middlewares/seller.middleware.js";
 
@@ -14,5 +14,6 @@ router.route("/single-product/:id").get(getSingleProduct);
 router.route("/:productId/review").post(verifyToken, addReviewForProfuct);
 router.route("/:productId/all-reviews").get(verifyToken, getAllReviews);
 router.route("/:productId/review/:reviewId").delete(verifyToken, deleteReview);
+router.route("/:productId/review/:reviewId").patch(verifyToken, updateReview);
 
 export default router;
