@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 import httpStatus from "http-status";
+import { User } from "../model/user.js";
 
-const verifyToken = (req, res, next)=>{
+const verifyToken = async (req, res, next)=>{
     try{
         const authHeader = req.headers.authorization;
 
@@ -19,6 +20,16 @@ const verifyToken = (req, res, next)=>{
         // console.log("this is decode ", decoded);
 
         req.user = decoded;
+
+        const user = await User.findById(decoded.id);
+
+        if(!user){
+           return res.status(httpStatus.NOT_FOUND).json({message:"User not found."});
+        }
+
+        if(user.isBlocked){
+            return res.status(403).json({message:"Your account has been blocked by admin."});
+        }
 
         next();
 

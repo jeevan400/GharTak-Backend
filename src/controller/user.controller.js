@@ -16,6 +16,10 @@ const login = async (req, res) => {
   try {
     const user = await User.findOne({ email: email.toLowerCase() });
 
+    if(user.isBlocked){
+      return res.status(403).json({message:"Your account has been blocked by admin."});
+    }
+
     if (!user) {
       return res
         .status(httpStatus.NOT_FOUND)
@@ -435,6 +439,52 @@ const rejectSellerRequest = async (req, res) => {
   }
 };
 
+// get all user seller, customer, and admin 
+const getAllUser = async (req, res) => {
+  try{
+    const users = await User.find();
+
+    if(!users){
+      return res.status(httpStatus.NOT_FOUND).json({message:"No User"});
+    }
+
+    res.status(httpStatus.OK).json(users);
+  } catch(e){
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
+  }
+}
+
+// admin block user 
+const ToggleBlockUser = async (req, res) => {
+  try{
+
+    if(req.user.role !== "admin"){
+      return res.status(403).json({message:'Only admin can Block users'});
+    }
+
+    const user = await User.findById(req.params.id);
+
+    if (!user){
+      return res.status(httpStatus.NOT_FOUND).json({message:"User not Found."});
+    }
+
+    if(user.role === "admin"){
+      return res.status(400).json({message:"Admin cannot be Block."});
+    }
+
+    user.isBlocked = !user.isBlocked;
+
+    await user.save();
+
+    res.status(httpStatus.OK).json({message:user.isBlocked?"User blocked successfully.":"User unblocked successfully.", user});
+
+
+  } catch(e){
+    res.status(httpStatus.OK).json({message:e.message});
+  }
+}
+
+
 export {
   register,
   login,
@@ -451,4 +501,6 @@ export {
   getAllStatusUser,
   approveSellerRequest,
   rejectSellerRequest,
+  getAllUser,
+  ToggleBlockUser,
 };
