@@ -1,5 +1,23 @@
 import { Router } from "express";
-import { register, login, sendOTP, verifyOTP, sendForgotPassOTP, verifyForgotPassOTP, resetPassword, googleLogin, getProfile, updateProfile, requestSellerRole, getSellerRequest, approveSellerRequest, rejectSellerRequest, getAllStatusUser } from "../controller/user.controller.js";
+import {
+  register,
+  login,
+  sendOTP,
+  verifyOTP,
+  sendForgotPassOTP,
+  verifyForgotPassOTP,
+  resetPassword,
+  googleLogin,
+  getProfile,
+  updateProfile,
+  requestSellerRole,
+  getSellerRequest,
+  approveSellerRequest,
+  rejectSellerRequest,
+  getAllStatusUser,
+  getAllUser,
+  ToggleBlockUser,
+} from "../controller/user.controller.js";
 import verifyToken from "../middlewares/auth.middleware.js";
 import isAdmin from "../middlewares/admin.middleware.js";
 
@@ -18,8 +36,13 @@ router.route("/profile").patch(verifyToken, updateProfile);
 router.route("/request-seller").patch(verifyToken, requestSellerRole);
 router.route("/seller-requests").get(verifyToken, isAdmin, getSellerRequest);
 router.route("/all-requests").get(verifyToken, isAdmin, getAllStatusUser);
-router.route("/approve-request/:id").patch(verifyToken, isAdmin, approveSellerRequest);
-router.route("/reject-request/:id").patch(verifyToken, isAdmin, rejectSellerRequest);
-
+router
+  .route("/approve-request/:id")
+  .patch(verifyToken, isAdmin, approveSellerRequest);
+router
+  .route("/reject-request/:id")
+  .patch(verifyToken, isAdmin, rejectSellerRequest);
+router.route("/all-users").get(verifyToken, isAdmin, getAllUser);
+router.route("/block-user/:id").patch(verifyToken, isAdmin, ToggleBlockUser);
 
 export default router;
