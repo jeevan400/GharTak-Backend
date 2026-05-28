@@ -90,12 +90,14 @@ const updateOrderStatus = async (req, res) => {
     }
 
     //check seller authorization
-    const sellerOwnsProducts = order.items?.some(
+    if(req.user.role !== "admin"){
+      const sellerOwnsProducts = order.items?.some(
       (item) => item?.product?.seller?.toString() === req.user.id
     );
 
     if(!sellerOwnsProducts) {
       return res.status(httpStatus.UNAUTHORIZED).json({message:"Unauthorized Access"});
+    }
     }
 
     order.orderStatus = status;
@@ -109,4 +111,67 @@ const updateOrderStatus = async (req, res) => {
   }
 }
 
-export { orderCreate, getMyOrder, updateOrderStatus };
+
+// get all orders 
+const getAllOrders = async (req, res) => {
+  try{
+
+    if(req.user.role !== "admin"){
+      return res.status(httpStatus.UNAUTHORIZED).json({message:"Only admin see all orders!"});
+    }
+
+    const orders = await Order.find().populate("user").populate("items.product");
+
+    res.status(httpStatus.OK).json(orders);
+
+  } catch(e){
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
+  }
+}
+
+
+// cancle order
+const cancelOrder = async (req, res) => {
+  try{
+    const order = await Order.findById(req.params.id);
+
+    if(!order){
+      return res.status(httpStatus.NOT_FOUND).json({message:"Order not found"});
+    }
+
+    if(order.orderStatus === "Cancelled"){
+      return res.status(400).json({message:"Order already cancelled."});
+    }
+
+    if(order.orderStatus === "Delivered"){
+      return res.status(httpStatus.BAD_REQUEST).json({message:"Delivered Order cannot be Cancelled."});
+    }
+
+    for(const item of order.items){
+
+      const productId = item.product;
+
+      const product = await Product.findById(productId);
+
+      if(!product){
+        return res.status(httpStatus.NOT_FOUND).json({message:"Product not found"});
+      }
+
+      product.stock += item.quantity;
+
+      await product.save();
+
+    }
+
+    order.orderStatus = "Cancelled";
+
+    await order.save();
+
+    res.status(httpStatus.OK).json({message:"Order Cancelled!"});
+
+  } catch(e){
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
+  }
+}
+
+export { orderCreate, getMyOrder, updateOrderStatus, getAllOrders, cancelOrder };
