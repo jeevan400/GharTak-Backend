@@ -11,6 +11,7 @@ import productRoutes from "./routes/product.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import addressRoutes from "./routes/address.routes.js";
+import wishlistRoutes from "./routes/wishList.routes.js"
 
 import cors from "cors";
 
@@ -31,6 +32,7 @@ app.use("/api/v1/products/", productRoutes);
 app.use("/api/v1/carts", cartRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/address", addressRoutes);
+app.use("/api/v1/wishlists", wishlistRoutes);
 
 
 const start = async ()=>{
