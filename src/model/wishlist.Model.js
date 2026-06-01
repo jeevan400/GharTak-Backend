@@ -11,7 +11,7 @@ const wishlistSchema = new mongoose.Schema({
             type:Schema.Types.ObjectId,
             ref:"Product",
         }
-    ]
+    ],
 });
 
 const WishList = mongoose.model("WishList", wishlistSchema);

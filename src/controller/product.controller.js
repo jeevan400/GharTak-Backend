@@ -94,13 +94,26 @@ const deleteProduct = async (req, res) => {
 //get all products
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find();
 
-    if (products.length === 0) {
-      return res.status(httpStatus.NOT_FOUND).json({ message: "No products" });
+    // search query
+    const search = req.query.search || "";
+
+    let query = {};
+
+    if(search){
+      query.name = {
+        $regex: search,
+        $options: "i"
+      };
     }
 
-    res.status(httpStatus.OK).json({ message: "All products", products });
+    const products = await Product.find(query);
+
+    if (products.length === 0) {
+      return res.status(httpStatus.NOT_FOUND).json({ message: "Product Not Found." });
+    }
+
+    res.status(httpStatus.OK).json({ products });
   } catch (e) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
   }
