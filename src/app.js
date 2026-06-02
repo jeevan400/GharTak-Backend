@@ -11,7 +11,8 @@ import productRoutes from "./routes/product.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import addressRoutes from "./routes/address.routes.js";
-import wishlistRoutes from "./routes/wishList.routes.js"
+import wishlistRoutes from "./routes/wishList.routes.js";
+import uploadRoutes from "./routes/upload.routes.js";
 
 import cors from "cors";
 
@@ -28,6 +29,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/uploads", uploadRoutes);
 app.use("/api/v1/products/", productRoutes);
 app.use("/api/v1/carts", cartRoutes);
 app.use("/api/v1/orders", orderRoutes);
