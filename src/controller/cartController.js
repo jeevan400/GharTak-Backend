@@ -83,7 +83,8 @@ const getCartItems = async (req, res) => {
             });
         }
 
-        res.status(httpStatus.OK).json(cart);
+    const totalCartItems = cart.items.length;
+        res.status(httpStatus.OK).json({cart, totalCartItems});
     } catch(e){
         res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
     }

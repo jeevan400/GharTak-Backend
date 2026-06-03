@@ -1,3 +1,4 @@
+import { Cart } from "../model/cartModel.js";
 import { Product } from "../model/product.js";
 import httpStatus from "http-status";
 
@@ -98,6 +99,15 @@ const getAllProducts = async (req, res) => {
     // search query
     const search = req.query.search || "";
 
+    // current page 
+    const page = Number(req.query.page) || 1;
+
+    // limit of products 
+    const limit = Number(req.query.limit) || 10;
+
+    // calculate the skip products 
+    const skip = (page -1 ) * limit;
+
     let query = {};
 
     if(search){
@@ -107,13 +117,23 @@ const getAllProducts = async (req, res) => {
       };
     }
 
-    const products = await Product.find(query);
+    const products = await Product.find(query).skip(skip).limit(limit);
 
     if (products.length === 0) {
       return res.status(httpStatus.NOT_FOUND).json({ message: "Product Not Found." });
     }
 
-    res.status(httpStatus.OK).json({ products });
+    // count total products
+    const totalProducts = await Product.countDocuments(query);
+
+    // calculate total pages 
+    const totalPages = Math.ceil(totalProducts/ limit);
+
+    res.status(httpStatus.OK).json({ products,
+      currentPage: page,
+      totalProducts,
+      totalPages,
+    });
   } catch (e) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
   }
