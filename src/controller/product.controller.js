@@ -1,6 +1,8 @@
 import { Cart } from "../model/cartModel.js";
+import { Notification } from "../model/notificationModel.js";
 import { Product } from "../model/product.js";
 import httpStatus from "http-status";
+import { getIO } from "./socketManager.js";
 
 // add product api
 const addProduct = async (req, res) => {
@@ -187,6 +189,23 @@ const addReviewForProfuct = async (req, res) => {
 
     await product.save();
 
+    const newNotification = await Notification.create({
+      receiver: product.seller,
+      sender: req.user.id,
+      type: "review",
+      title:"Reviewed",
+      message: `${req.user.id} reviewed your product`
+    });
+
+    const io = getIO();
+    const sellerRoom = product.seller.toString();
+    // console.log("Before Emit");
+    // console.log("Seller ID:", sellerRoom);
+    const room = io.sockets.adapter.rooms.get(sellerRoom);
+    // console.log("Room exists:", Boolean(room), room);
+
+    io.to(sellerRoom).emit("newNotification", newNotification);
+    // console.log("After Emit");
     res.status(httpStatus.OK).json({ message: "Review added successfully!" });
   } catch (e) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
