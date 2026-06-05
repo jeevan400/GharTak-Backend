@@ -2,9 +2,17 @@ import mongoose from "mongoose";
 import { Schema } from "mongoose";
 
 const notificationSchema = new Schema({
-  user: {
+  receiver: {
     type: Schema.Types.ObjectId,
     ref: "User",
+  },
+  sender:{
+    type:Schema.Types.ObjectId,
+    ref:"User",
+  },
+  type: {
+    type:String,
+    enum:["review", "cart", "order", "wishlist"]
   },
   title: {
     type: String,

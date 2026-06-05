@@ -1,6 +1,7 @@
 import httpStatus from "http-status";
 import { Product } from "../model/product.js";
 import { Cart } from "../model/cartModel.js";
+import { Notification } from "../model/notificationModel.js";
 
 // add to cart api
 const addToCart = async (req, res)=>{
@@ -58,6 +59,14 @@ const addToCart = async (req, res)=>{
         cart.totalItems = cart.items.reduce((acc, item)=> acc + item.quantity, 0);
 
         await cart.save();
+
+        await Notification.create({
+            receiver: req.user.id,
+            sender: req.user.id,
+            type:"cart",
+            title:"Add To Cart",
+            message: "Product added to cart."
+        });
 
         res.status(httpStatus.OK).json({message:"Product added to cart", cart});
 

@@ -14,11 +14,18 @@ import addressRoutes from "./routes/address.routes.js";
 import wishlistRoutes from "./routes/wishList.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
+import http from "http";
+
 
 import cors from "cors";
+import { connectToSocket } from './controller/socketManager.js';
 
 const app = express();
 const port = 9000;
+
+const httpServer = http.createServer(app);
+
+const io = connectToSocket(httpServer);
 
 app.use(cors({
     origin:"http://localhost:5173",
@@ -39,13 +46,14 @@ app.use("/api/v1/wishlists", wishlistRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 
 
+
 const start = async ()=>{
     const connectionDB = await mongoose.connect(process.env.MONGO_URL);
     console.log(`MONGO connected DB host : ${connectionDB.connection.host}`);
 
-    app.listen((app.get("port")),()=>{
+    httpServer.listen((app.get("port")),()=>{
         console.log(`LISTENING ON PORT NO ${app.get("port")}`);
-    })
+    });
 }
 
 start();
