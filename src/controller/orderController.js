@@ -2,6 +2,8 @@ import httpStatus from "http-status";
 import { Order } from "../model/orderModel.js";
 import { Cart } from "../model/cartModel.js";
 import { Product } from "../model/product.js";
+import { Notification } from "../model/notificationModel.js";
+import { getIO } from "./socketManager.js";
 
 const orderCreate = async (req, res) => {
   try {
@@ -11,7 +13,7 @@ const orderCreate = async (req, res) => {
       // find cart
       const cart = await Cart.findOne({
         user:req.user.id
-      });
+      }).populate("items.product");
 
       if(!cart || cart.items.length === 0){
         return res.status(400).json({message:"Cart is Empty."});
@@ -44,12 +46,45 @@ const orderCreate = async (req, res) => {
         });
       }
 
-      // clear cart
+      await cart.save();
+
+      await cart.populate("items.product");
+
+      console.log("this is cart Items here: ", cart.items)
+      const sellers = [];
+      for(let i = 0; i<cart.items.length; i++){
+        console.log("cart items product here : ", cart.items[i].product)
+        if(!sellers.includes(cart.items[i].product.seller.toString())){
+          sellers.push(cart.items[i].product.seller.toString());
+        }
+      }
+      console.log("these are sellers : ", sellers);
+
+
+      for(let i=0; i<sellers.length; i++){
+        const newNotification = await Notification.create({
+      receiver: sellers[i].toString(),
+      sender: req.user.id,
+      type: "review",
+      title:"Order Placed",
+      message: `${req.user.email} place a order.`
+    });
+
+    const io = getIO();
+    const sellerRoom = sellers[i].toString();
+    // console.log("Before Emit");
+    // console.log("Seller ID:", sellerRoom);
+    const room = io.sockets.adapter.rooms.get(sellerRoom);
+    // console.log("Room exists:", Boolean(room), room);
+
+    io.to(sellerRoom).emit("newNotification", newNotification);
+      }
+
+
+    // clear cart
       cart.items=[];
       cart.totalItems=0;
       cart.totalPrice=0;
-
-      await cart.save();
 
       res.status(httpStatus.OK).json({message:"Order placed successfully", order});
   } catch (e) {

@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { addProduct, addReviewForProfuct, deleteProduct, deleteReview, getAllProducts, getAllReviews, getMyProduct, getSingleProduct, updateProduct, updateReview } from "../controller/product.controller.js";
+import { addProduct, addReviewForProfuct, blockProduct, deleteProduct, deleteReview, getAllProducts, getAllReviews, getMyProduct, getSingleProduct, updateProduct, updateReview } from "../controller/product.controller.js";
 import verifyToken from "../middlewares/auth.middleware.js";
 import isSeller from "../middlewares/seller.middleware.js";
+import isAdmin from "../middlewares/admin.middleware.js";
 
 const router = Router();
 
@@ -15,5 +16,6 @@ router.route("/:productId/review").post(verifyToken, addReviewForProfuct);
 router.route("/:productId/all-reviews").get(verifyToken, getAllReviews);
 router.route("/:productId/review/:reviewId").delete(verifyToken, deleteReview);
 router.route("/:productId/review/:reviewId").patch(verifyToken, updateReview);
+router.route("/diactivate-product/:productId").patch(verifyToken, isAdmin, blockProduct );
 
 export default router;

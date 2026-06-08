@@ -306,6 +306,60 @@ const updateReview = async (req, res) =>{
   }
 }
 
+const blockProduct = async (req, res) =>{
+  try{
+      const product = await Product.findById(req.params.productId);
+
+      if(!product){
+        return res.status(httpStatus.NOT_FOUND).json({message:"Product not found."});
+      }
+
+      product.isActive = !product.isActive;
+
+      await product.save();
+
+      if(product.isActive){
+        const newNotification = await Notification.create({
+      receiver: product.seller,
+      sender: req.user.id,
+      type: "review",
+      title:"Block Product",
+      message: `admin block your product`
+    });
+
+    const io = getIO();
+    const sellerRoom = product.seller.toString();
+    // console.log("Before Emit");
+    // console.log("Seller ID:", sellerRoom);
+    const room = io.sockets.adapter.rooms.get(sellerRoom);
+    // console.log("Room exists:", Boolean(room), room);
+
+    io.to(sellerRoom).emit("newNotification", newNotification);
+      } else{
+        const newNotification = await Notification.create({
+      receiver: product.seller,
+      sender: req.user.id,
+      type: "review",
+      title:"Unblock Product",
+      message: `Admin unblock your product`
+    });
+
+    const io = getIO();
+    const sellerRoom = product.seller.toString();
+    // console.log("Before Emit");
+    // console.log("Seller ID:", sellerRoom);
+    const room = io.sockets.adapter.rooms.get(sellerRoom);
+    // console.log("Room exists:", Boolean(room), room);
+
+    io.to(sellerRoom).emit("newNotification", newNotification);
+      }
+
+      res.status(httpStatus.OK).json({message:"Successfully Change Product Status."});
+  } catch(e){
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
+  }
+}
+
 export {
   addProduct,
   getMyProduct,
@@ -317,4 +371,5 @@ export {
   getAllReviews,
   deleteReview,
   updateReview,
+  blockProduct
 };
