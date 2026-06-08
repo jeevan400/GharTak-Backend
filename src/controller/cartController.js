@@ -2,6 +2,7 @@ import httpStatus from "http-status";
 import { Product } from "../model/product.js";
 import { Cart } from "../model/cartModel.js";
 import { Notification } from "../model/notificationModel.js";
+import { getIO } from "./socketManager.js";
 
 // add to cart api
 const addToCart = async (req, res)=>{
@@ -60,13 +61,21 @@ const addToCart = async (req, res)=>{
 
         await cart.save();
 
-        await Notification.create({
+        const notification = await Notification.create({
             receiver: req.user.id,
             sender: req.user.id,
             type:"cart",
             title:"Add To Cart",
             message: "Product added to cart."
         });
+
+        const io = getIO();
+
+        const buyerRoom = req.user.id.toString();
+    // console.log("Before Emit");
+    // console.log("Seller ID:", sellerRoom);
+    const room = io.sockets.adapter.rooms.get(buyerRoom);
+        io.to(req.user.id).emit("newNotification", notification);
 
         res.status(httpStatus.OK).json({message:"Product added to cart", cart});
 
