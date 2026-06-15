@@ -254,12 +254,14 @@ const cancelOrder = async (req, res) => {
 
 const todaysOrders = async ( req, res) =>{
   try{
+    // today revvenue
     const startOfDay = new Date();
     startOfDay.setHours(0,0,0,0);
 
     const endOfDay = new Date();
     endOfDay.setHours(23,59,59,999);
 
+    // yesterday revenue
     const yesterdayStart = new Date();
     yesterdayStart.setDate(yesterdayStart.getDate() - 1);
     yesterdayStart.setHours(0,0,0,0);
@@ -268,19 +270,105 @@ const todaysOrders = async ( req, res) =>{
     yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
     yesterdayEnd.setHours(23, 59, 59, 999);
 
-    const todayOrders = await Order.find({createdAt:{$gte:startOfDay, $lte:endOfDay}});
-    const yesterdayOrders = await Order.find({createdAt:{$gte:yesterdayStart, $lte:yesterdayEnd}});
-
-    if(todayOrders.length === 0) {
-      return res.status(httpStatus.NOT_FOUND).json({message:"No order receive today."});
-    }
-    if(yesterdayOrders.length === 0){
-      return res.status(httpStatus.NOT_FOUND).json({message:"No order receive yesterday."});
-    }
-    const totalRevenue = todayOrders.reduce((sum, order)=> sum+order.totalPrice, 0 );
-    const yesterdayTotalRevenue = yesterdayOrders.reduce((sum, order)=> sum+order.totalPrice, 0 );
+    // month revenue
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0,0,0,0);
     
-    res.status(httpStatus.OK).json({totalRevenue, yesterdayTotalRevenue});
+    const monthEnd = new Date();
+    monthEnd.setMonth(monthEnd.getMonth()+1);
+    monthEnd.setDate(0);
+    monthEnd.setHours(23, 59, 59, 999);
+
+    // const todayOrders = await Order.find({createdAt:{$gte:startOfDay, $lte:endOfDay}});
+    // const yesterdayOrders = await Order.find({createdAt:{$gte:yesterdayStart, $lte:yesterdayEnd}});
+    // const MonthOrders = await Order.find({createdAt:{$gte:monthStart, $lte:monthEnd}});
+
+    // calculate the today revenue
+    const todaySell = await Order.aggregate([
+      {
+        $match:{
+          createdAt:{
+            $gte:startOfDay, 
+            $lte:endOfDay
+          },
+          orderStatus:"Delivered"
+        }
+      },
+      {
+        $group:{
+          _id:null,
+          revenue:{
+            $sum:"$totalPrice"
+          }
+        }
+      }
+    ]);
+
+    // calculate the resterday revenue
+    const yesterdaySell = await Order.aggregate([
+      {
+        $match:{
+          createdAt:{
+            $gte:yesterdayStart,
+            $lte:yesterdayEnd
+          },
+          orderStatus:"Delivered"
+        }
+      },
+      {
+        $group:{
+          _id:null,
+          revenue:{
+            $sum:"$totalPrice"
+          }
+        }
+      }
+    ]);
+
+    // calculate the month revenue
+    const monthSell = await Order.aggregate([
+      {
+        $match:{
+          createdAt:{
+            $gte:monthStart, 
+            $lte:monthEnd
+          },
+          orderStatus:"Delivered"
+        }
+      },
+      {
+        $group:{
+          _id:null,
+          revenue:{
+            $sum:"$totalPrice"
+          }
+        }
+      }
+    ]);
+
+    // calculate total revenue
+    const overAllRevenue = await Order.aggregate([
+      {
+        $match:{
+          orderStatus:"Delivered"
+        }
+      },
+      {
+        $group:{
+          _id:null,
+          revenue:{
+            $sum: "$totalPrice"
+          }
+        }
+      }
+    ]);
+
+    // const totalRevenue = todayOrders.reduce((sum, order)=> sum + order.totalPrice, 0);
+    // const yesterdayTotalRevenue = yesterdayOrders.reduce((sum, order)=> sum + order.totalPrice, 0);
+    // const monthTotalRevenue = MonthOrders.reduce((sum, order) => sum + order.totalPrice, 0);
+
+    res.status(httpStatus.OK).json({overAllRevenue, todaySell, yesterdaySell, monthSell});
 
   } catch(e){
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});

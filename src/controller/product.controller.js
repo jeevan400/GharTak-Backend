@@ -3,6 +3,7 @@ import { Notification } from "../model/notificationModel.js";
 import { Product } from "../model/product.js";
 import httpStatus from "http-status";
 import { getIO } from "./socketManager.js";
+import { User } from "../model/user.js";
 
 // add product api
 const addProduct = async (req, res) => {
@@ -41,6 +42,11 @@ const getMyProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
+    const user = await User.findById(req.user.id).select("-password");
+
+    if(!user){
+      return res.status(httpStatus.NOT_FOUND).json({message:"User not found!"});
+    }
 
     if (!product) {
       return res
@@ -48,8 +54,8 @@ const updateProduct = async (req, res) => {
         .json({ message: "Product not found." });
     }
 
-    //seller ownership check
-    if (product.seller.toString() !== req.user.id) {
+    // seller ownership check or admin allowed
+    if (product.seller.toString() !== req.user.id && user.role !== "admin") {
       return res
         .status(httpStatus.FORBIDDEN)
         .json({ message: "You are not authorized to update this product" });
