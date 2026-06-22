@@ -6,7 +6,7 @@ export const connectToSocket = (server) => {
   // the connectToSocket are use to connect the http server to socket.io
    io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL,
+      origin: [process.env.CLIENT_URL, "http://localhost:5173"],
       methods: ["GET", "POST"],
       allowedHeaders: ["*"],
       credentials: true,
