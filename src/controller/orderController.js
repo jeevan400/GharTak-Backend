@@ -280,10 +280,6 @@ const todaysOrders = async ( req, res) =>{
     monthEnd.setDate(0);
     monthEnd.setHours(23, 59, 59, 999);
 
-    // const todayOrders = await Order.find({createdAt:{$gte:startOfDay, $lte:endOfDay}});
-    // const yesterdayOrders = await Order.find({createdAt:{$gte:yesterdayStart, $lte:yesterdayEnd}});
-    // const MonthOrders = await Order.find({createdAt:{$gte:monthStart, $lte:monthEnd}});
-
     // calculate the today revenue
     const todaySell = await Order.aggregate([
       {
@@ -363,10 +359,6 @@ const todaysOrders = async ( req, res) =>{
         }
       }
     ]);
-
-    // const totalRevenue = todayOrders.reduce((sum, order)=> sum + order.totalPrice, 0);
-    // const yesterdayTotalRevenue = yesterdayOrders.reduce((sum, order)=> sum + order.totalPrice, 0);
-    // const monthTotalRevenue = MonthOrders.reduce((sum, order) => sum + order.totalPrice, 0);
 
     res.status(httpStatus.OK).json({overAllRevenue, todaySell, yesterdaySell, monthSell});
 
