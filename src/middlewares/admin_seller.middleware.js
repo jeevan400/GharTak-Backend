@@ -2,7 +2,6 @@ import httpStatus from "http-status";
 
 const allowAdminSeller = (req, res, next)=>{
     try{
-        // console.log("this is seller middleware user ",req.user);
         if(req.user.role !== "seller" && req.user.role !== "admin"){
             return res.status(403).json({message:"Admin and Seller Access Denied!"});
         }

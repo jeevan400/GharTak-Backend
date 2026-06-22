@@ -27,7 +27,7 @@ router
 router
   .route("/delete-product/:id")
   .delete(verifyToken, isSeller, deleteProduct);
-router.route("/all-products").get(getAllProducts);
+router.route("/all-products").get(verifyToken, getAllProducts);
 router.route("/single-product/:id").get(getSingleProduct);
 router.route("/:productId/review").post(verifyToken, addReviewForProfuct);
 router.route("/:productId/all-reviews").get(verifyToken, getAllReviews);

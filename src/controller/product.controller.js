@@ -125,7 +125,14 @@ const getAllProducts = async (req, res) => {
       };
     }
 
-    const products = await Product.find(query).skip(skip).limit(limit);
+    let filter = { ...query };
+
+    if(req.user?.role === "user"){
+      filter.isActive = true;
+    }
+
+    console.log("this is user: ", req.user);
+    const products = await Product.find(filter).skip(skip).limit(limit);
 
     if (products.length === 0) {
       return res.status(httpStatus.NOT_FOUND).json({ message: "Product Not Found." });
@@ -205,13 +212,9 @@ const addReviewForProfuct = async (req, res) => {
 
     const io = getIO();
     const sellerRoom = product.seller.toString();
-    // console.log("Before Emit");
-    // console.log("Seller ID:", sellerRoom);
     const room = io.sockets.adapter.rooms.get(sellerRoom);
-    // console.log("Room exists:", Boolean(room), room);
-
+    
     io.to(sellerRoom).emit("newNotification", newNotification);
-    // console.log("After Emit");
     res.status(httpStatus.OK).json({ message: "Review added successfully!" });
   } catch (e) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
@@ -335,11 +338,8 @@ const blockProduct = async (req, res) =>{
 
     const io = getIO();
     const sellerRoom = product.seller.toString();
-    // console.log("Before Emit");
-    // console.log("Seller ID:", sellerRoom);
     const room = io.sockets.adapter.rooms.get(sellerRoom);
-    // console.log("Room exists:", Boolean(room), room);
-
+    
     io.to(sellerRoom).emit("newNotification", newNotification);
       } else{
         const newNotification = await Notification.create({
@@ -352,11 +352,8 @@ const blockProduct = async (req, res) =>{
 
     const io = getIO();
     const sellerRoom = product.seller.toString();
-    // console.log("Before Emit");
-    // console.log("Seller ID:", sellerRoom);
     const room = io.sockets.adapter.rooms.get(sellerRoom);
-    // console.log("Room exists:", Boolean(room), room);
-
+    
     io.to(sellerRoom).emit("newNotification", newNotification);
       }
 
