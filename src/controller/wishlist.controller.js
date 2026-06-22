@@ -69,7 +69,6 @@ const addWishList = async (req, res) => {
     // send notification
     for (let i = 0; i < wishList.products.length; i++) {
       if(req.params.productId.toString() === wishList.products[i]._id.toString()){
-      console.log("this is product : ", wishList.products[i]);
       const newNotification = await Notification.create({
           receiver: wishList.products[i].seller._id.toString(),
           sender: req.user.id,

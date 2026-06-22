@@ -72,8 +72,6 @@ const addToCart = async (req, res)=>{
         const io = getIO();
 
         const buyerRoom = req.user.id.toString();
-    // console.log("Before Emit");
-    // console.log("Seller ID:", sellerRoom);
     const room = io.sockets.adapter.rooms.get(buyerRoom);
         io.to(req.user.id).emit("newNotification", notification);
 

@@ -340,7 +340,6 @@ const getProfile = async (req, res) => {
 // user update
 const updateProfile = async (req, res) => {
   try {
-    // console.log(req);
     const updatedUser = await User.findByIdAndUpdate(req.user.id, req.body, {
       new: true,
     }).select("-password");
@@ -356,7 +355,6 @@ const updateProfile = async (req, res) => {
 // create seller requrest api
 const requestSellerRole = async (req, res) => {
   try {
-    // console.log(req);
     const user = await User.findById(req.user.id);
 
     if (user.role === "seller") {
