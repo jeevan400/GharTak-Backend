@@ -59,15 +59,12 @@ const orderCreate = async (req, res) => {
 
     await cart.populate("items.product");
 
-    console.log("this is cart Items here: ", cart.items);
     const sellers = [];
     for (let i = 0; i < cart.items.length; i++) {
-      console.log("cart items product here : ", cart.items[i].product);
       if (!sellers.includes(cart.items[i].product.seller.toString())) {
         sellers.push(cart.items[i].product.seller.toString());
       }
     }
-    console.log("these are sellers : ", sellers);
 
     for (let i = 0; i < sellers.length; i++) {
       const newNotification = await Notification.create({
@@ -80,10 +77,7 @@ const orderCreate = async (req, res) => {
 
       const io = getIO();
       const sellerRoom = sellers[i].toString();
-      // console.log("Before Emit");
-      // console.log("Seller ID:", sellerRoom);
       const room = io.sockets.adapter.rooms.get(sellerRoom);
-      // console.log("Room exists:", Boolean(room), room);
 
       io.to(sellerRoom).emit("newNotification", newNotification);
     }

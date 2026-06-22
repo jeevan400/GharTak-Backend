@@ -21,14 +21,14 @@ import cors from "cors";
 import { connectToSocket } from './controller/socketManager.js';
 
 const app = express();
-const port = 9000;
+const port = process.env.PORT || 9000;
 
 const httpServer = http.createServer(app);
 
 const io = connectToSocket(httpServer);
 
 app.use(cors({
-    origin:"http://localhost:5173",
+    origin:process.env.CLIENT_URL,
     credentials:true
 }));
 

@@ -24,7 +24,6 @@ const addProduct = async (req, res) => {
 //get my products api
 const getMyProduct = async (req, res) => {
   try {
-    // console.log("this is request object ", req);
     const products = await Product.find({ seller: req.user.id });
 
     if (!products) {
@@ -32,7 +31,6 @@ const getMyProduct = async (req, res) => {
     }
 
     res.status(httpStatus.OK).json(products);
-    // console.log("this is a my products ", products);
   } catch (e) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
   }
@@ -131,7 +129,6 @@ const getAllProducts = async (req, res) => {
       filter.isActive = true;
     }
 
-    console.log("this is user: ", req.user);
     const products = await Product.find(filter).skip(skip).limit(limit);
 
     if (products.length === 0) {
