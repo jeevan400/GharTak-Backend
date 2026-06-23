@@ -15,6 +15,7 @@ import wishlistRoutes from "./routes/wishList.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import http from "http";
+import chatRoutes from "./routes/conversation.routes.js";
 
 
 import cors from "cors";
@@ -44,6 +45,7 @@ app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/address", addressRoutes);
 app.use("/api/v1/wishlists", wishlistRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
+app.use("/api/v1/chats", chatRoutes);
 
 
 
