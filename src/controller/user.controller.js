@@ -483,6 +483,21 @@ const ToggleBlockUser = async (req, res) => {
 }
 
 
+// product owner details
+const productOwner = async (req, res) => {
+  try{
+    const owner = await User.findById(req.params.ownerId).select("-password");
+
+    if(!owner){
+      return res.status(httpStatus.NOT_FOUND).json({message:"Product Owner not Found."});
+    }
+
+    res.status(httpStatus.OK).json(owner);
+  } catch(e){
+    res.status(httpStatus).json({message:e.message});
+  }
+}
+
 export {
   register,
   login,
@@ -501,4 +516,5 @@ export {
   rejectSellerRequest,
   getAllUser,
   ToggleBlockUser,
+  productOwner,
 };

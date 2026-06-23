@@ -17,6 +17,7 @@ import {
   getAllStatusUser,
   getAllUser,
   ToggleBlockUser,
+  productOwner,
 } from "../controller/user.controller.js";
 import verifyToken from "../middlewares/auth.middleware.js";
 import isAdmin from "../middlewares/admin.middleware.js";
@@ -44,5 +45,6 @@ router
   .patch(verifyToken, isAdmin, rejectSellerRequest);
 router.route("/all-users").get(verifyToken, isAdmin, getAllUser);
 router.route("/block-user/:id").patch(verifyToken, isAdmin, ToggleBlockUser);
+router.route("/owner/:ownerId").get( verifyToken, productOwner);
 
 export default router;

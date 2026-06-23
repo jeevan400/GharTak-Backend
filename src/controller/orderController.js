@@ -102,7 +102,13 @@ const getMyOrder = async (req, res) => {
     const orders = await Order.find({
       user: req.user.id,
     })
-      .populate("items.product")
+      .populate({
+        path: "items.product",
+        populate: {
+          path: "seller",
+          select: "name email role image _id",
+        },
+      })
       .sort({ createdAt: -1 });
 
     if (!orders) {
@@ -246,19 +252,19 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-const todaysOrders = async ( req, res) =>{
-  try{
+const todaysOrders = async (req, res) => {
+  try {
     // today revvenue
     const startOfDay = new Date();
-    startOfDay.setHours(0,0,0,0);
+    startOfDay.setHours(0, 0, 0, 0);
 
     const endOfDay = new Date();
-    endOfDay.setHours(23,59,59,999);
+    endOfDay.setHours(23, 59, 59, 999);
 
     // yesterday revenue
     const yesterdayStart = new Date();
     yesterdayStart.setDate(yesterdayStart.getDate() - 1);
-    yesterdayStart.setHours(0,0,0,0);
+    yesterdayStart.setHours(0, 0, 0, 0);
 
     const yesterdayEnd = new Date();
     yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
@@ -267,99 +273,100 @@ const todaysOrders = async ( req, res) =>{
     // month revenue
     const monthStart = new Date();
     monthStart.setDate(1);
-    monthStart.setHours(0,0,0,0);
-    
+    monthStart.setHours(0, 0, 0, 0);
+
     const monthEnd = new Date();
-    monthEnd.setMonth(monthEnd.getMonth()+1);
+    monthEnd.setMonth(monthEnd.getMonth() + 1);
     monthEnd.setDate(0);
     monthEnd.setHours(23, 59, 59, 999);
 
     // calculate the today revenue
     const todaySell = await Order.aggregate([
       {
-        $match:{
-          createdAt:{
-            $gte:startOfDay, 
-            $lte:endOfDay
+        $match: {
+          createdAt: {
+            $gte: startOfDay,
+            $lte: endOfDay,
           },
-          orderStatus:"Delivered"
-        }
+          orderStatus: "Delivered",
+        },
       },
       {
-        $group:{
-          _id:null,
-          revenue:{
-            $sum:"$totalPrice"
-          }
-        }
-      }
+        $group: {
+          _id: null,
+          revenue: {
+            $sum: "$totalPrice",
+          },
+        },
+      },
     ]);
 
     // calculate the resterday revenue
     const yesterdaySell = await Order.aggregate([
       {
-        $match:{
-          createdAt:{
-            $gte:yesterdayStart,
-            $lte:yesterdayEnd
+        $match: {
+          createdAt: {
+            $gte: yesterdayStart,
+            $lte: yesterdayEnd,
           },
-          orderStatus:"Delivered"
-        }
+          orderStatus: "Delivered",
+        },
       },
       {
-        $group:{
-          _id:null,
-          revenue:{
-            $sum:"$totalPrice"
-          }
-        }
-      }
+        $group: {
+          _id: null,
+          revenue: {
+            $sum: "$totalPrice",
+          },
+        },
+      },
     ]);
 
     // calculate the month revenue
     const monthSell = await Order.aggregate([
       {
-        $match:{
-          createdAt:{
-            $gte:monthStart, 
-            $lte:monthEnd
+        $match: {
+          createdAt: {
+            $gte: monthStart,
+            $lte: monthEnd,
           },
-          orderStatus:"Delivered"
-        }
+          orderStatus: "Delivered",
+        },
       },
       {
-        $group:{
-          _id:null,
-          revenue:{
-            $sum:"$totalPrice"
-          }
-        }
-      }
+        $group: {
+          _id: null,
+          revenue: {
+            $sum: "$totalPrice",
+          },
+        },
+      },
     ]);
 
     // calculate total revenue
     const overAllRevenue = await Order.aggregate([
       {
-        $match:{
-          orderStatus:"Delivered"
-        }
+        $match: {
+          orderStatus: "Delivered",
+        },
       },
       {
-        $group:{
-          _id:null,
-          revenue:{
-            $sum: "$totalPrice"
-          }
-        }
-      }
+        $group: {
+          _id: null,
+          revenue: {
+            $sum: "$totalPrice",
+          },
+        },
+      },
     ]);
 
-    res.status(httpStatus.OK).json({overAllRevenue, todaySell, yesterdaySell, monthSell});
-
-  } catch(e){
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:e.message});
+    res
+      .status(httpStatus.OK)
+      .json({ overAllRevenue, todaySell, yesterdaySell, monthSell });
+  } catch (e) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: e.message });
   }
-}
+};
 
 export {
   orderCreate,
@@ -367,5 +374,5 @@ export {
   updateOrderStatus,
   getAllOrders,
   cancelOrder,
-  todaysOrders
+  todaysOrders,
 };
