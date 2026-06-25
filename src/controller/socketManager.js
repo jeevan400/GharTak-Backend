@@ -21,6 +21,11 @@ export const connectToSocket = (server) => {
         console.log(`User Joined Room ${userId}`);
     });
 
+    socket.on("joinConversation", (conversationId)=>{
+      socket.join(conversationId);
+      console.log("user join conversation room ", conversationId);
+    });
+
     socket.on("message", (data)=>{
         console.log(data);
     })
