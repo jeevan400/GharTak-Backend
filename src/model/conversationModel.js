@@ -9,6 +9,17 @@ const converSationSchema = new Schema(
         ref: "User",
       },
     ],
+    lastMessage: {
+      type: String,
+      default: "",
+    },
+    lastMessageRead:{
+      type:Boolean,
+    },
+    lastMessageAt: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true },
 );
